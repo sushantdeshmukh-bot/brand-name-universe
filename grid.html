@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<title>Brand Name Universe — Grid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0c;overflow:hidden;height:100vh;width:100vw}
+#cv{display:block}
+.ui{position:fixed;z-index:10;pointer-events:none}
+.ui>*{pointer-events:auto}
+.top{top:0;left:0;right:0;padding:16px 20px}
+.branding h1{font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:0.06em;text-transform:uppercase;font-family:'DM Sans',sans-serif}
+.branding p{font-size:11px;color:rgba(255,255,255,0.2);margin-top:3px;font-weight:300;font-family:'DM Sans',sans-serif}
+.legend{bottom:20px;left:20px;display:flex;flex-direction:column;gap:2px;font-family:'DM Sans',sans-serif}
+.li{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,0.2);cursor:pointer;padding:3px 8px;border-radius:4px}
+.li:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)}
+.li.active{color:rgba(255,255,255,0.5);font-weight:500}
+.ld{width:7px;height:7px;border-radius:50%}
+
+.sb{position:fixed;top:16px;right:20px;z-index:10;width:240px}
+.sb input{width:100%;padding:9px 12px 9px 32px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#fff;font-size:12px;outline:none;font-family:'DM Sans',sans-serif}
+.sb input:focus{border-color:rgba(255,255,255,0.2)}
+.sb input::placeholder{color:rgba(255,255,255,0.2)}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.2);font-size:13px}
+.sr{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:rgba(12,12,15,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:8px;max-height:200px;overflow-y:auto;display:none;backdrop-filter:blur(20px)}
+.sr.show{display:block}
+.sri{padding:8px 14px;font-size:12px;cursor:pointer;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif}
+.sri:hover{background:rgba(255,255,255,0.04);color:#fff}
+.sri.add{color:#8B7FE8;border-top:1px solid rgba(255,255,255,0.04)}
+.list-toggle{position:fixed;top:16px;right:280px;z-index:10;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 14px;color:rgba(255,255,255,0.5);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;letter-spacing:0.03em}
+.list-toggle:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8)}
+.list-toggle.active{background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2)}
+.list-panel{position:fixed;top:56px;right:20px;width:320px;max-height:calc(100vh - 120px);background:rgba(12,12,18,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:12px;z-index:15;display:none;flex-direction:column;backdrop-filter:blur(20px);overflow:hidden}
+.list-panel.show{display:flex}
+.list-header{padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+.list-header span{font-size:12px;color:rgba(255,255,255,0.5);font-weight:500;font-family:'DM Sans',sans-serif}
+.list-count{font-size:11px;color:rgba(255,255,255,0.2)}
+.list-body{overflow-y:auto;flex:1;padding:6px 0}
+.list-item{padding:8px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.1s;font-family:'DM Sans',sans-serif}
+.list-item:hover{background:rgba(255,255,255,0.04)}
+.list-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.list-name{font-size:12px;color:rgba(255,255,255,0.7);font-weight:500}
+.list-tags{display:flex;gap:3px;margin-left:auto;flex-shrink:0}
+.list-tag{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:500}
+.list-body::-webkit-scrollbar{width:4px}
+.list-body::-webkit-scrollbar-track{background:transparent}
+.list-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="cv"></div>
+<div class="ui top"><div class="branding"><h1>Brand Name Universe</h1><p>377 names · move cursor to explore</p></div></div>
+
+<div class="sb"><span class="si">&#x2315;</span><input type="text" id="si" placeholder="Search..." autocomplete="off"><div class="sr" id="sr"></div></div>
+<button class="list-toggle" id="listToggle" onclick="toggleList()">List view</button>
+<div class="list-panel" id="listPanel">
+<div class="list-header"><span>All names</span><span class="list-count" id="listCount"></span></div>
+<div class="list-body" id="listBody"></div>
+</div>
+<div class="ui legend" id="leg"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var SEED=[{"n":"Paisawala","x":0.186,"y":-0.418,"z":0.069},{"n":"Moneyhat","x":-0.097,"y":-0.478,"z":-0.438},{"n":"PowerWealth","x":0.003,"y":0.09,"z":-0.341},{"n":"PowerMoney","x":-0.25,"y":-0.126,"z":-0.685},{"n":"SIPTrade","x":0.195,"y":-0.303,"z":0.145},{"n":"Siptrade","x":0.369,"y":-0.225,"z":0.242},{"n":"Middleup","x":-0.085,"y":-0.149,"z":-0.244},{"n":"XtraMoney","x":0.02,"y":-0.348,"z":-0.372},{"n":"MoneyRoots","x":-0.049,"y":-0.373,"z":-0.299},{"n":"DhanRoots","x":0.05,"y":-0.311,"z":1},{"n":"FinRoots","x":0.022,"y":0.314,"z":0.21},{"n":"NimbleMoney","x":-0.125,"y":-0.449,"z":-0.449},{"n":"Fundwell","x":-0.186,"y":-0.625,"z":-0.616},{"n":"Fintegro","x":-0.08,"y":0.169,"z":0.085},{"n":"IndiWise","x":0.274,"y":0.239,"z":0.125},{"n":"Market","x":-0.753,"y":-0.649,"z":-0.644},{"n":"Investra","x":0.874,"y":-0.51,"z":-0.487},{"n":"MarketMoney","x":0.066,"y":-0.272,"z":-0.28},{"n":"MarketApp","x":0.3,"y":-0.269,"z":-0.261},{"n":"Investox","x":0.059,"y":-0.276,"z":-0.252},{"n":"Riinvest","x":-0.232,"y":-0.631,"z":-0.636},{"n":"RiinvestFunds","x":0.089,"y":-0.163,"z":-0.242},{"n":"RiinvestMoney","x":-0.186,"y":-0.497,"z":-0.551},{"n":"Riave","x":0.939,"y":-0.052,"z":-0.081},{"n":"Investico","x":0.789,"y":-0.568,"z":-0.618},{"n":"Stephin","x":0.857,"y":-0.027,"z":-0.064},{"n":"HopeMoney","x":-0.03,"y":0.117,"z":-0.329},{"n":"SimplMoney","x":-0.103,"y":-0.41,"z":-0.446},{"n":"Simply","x":-0.438,"y":0.357,"z":-0.26},{"n":"DhanSetu","x":-0.268,"y":-0.683,"z":0.269},{"n":"Finnest","x":0.074,"y":0.244,"z":0.238},{"n":"Finway","x":0.228,"y":0.202,"z":0.148},{"n":"Moveup","x":0.215,"y":1,"z":0.157},{"n":"Fundamoney","x":0.041,"y":-0.29,"z":-0.267},{"n":"ActiveMoney","x":-0.323,"y":-0.201,"z":-0.676},{"n":"ActiveWealth","x":0.007,"y":0.074,"z":-0.36},{"n":"ActiveFund","x":-0.063,"y":0.033,"z":-0.391},{"n":"GoIndia","x":0.166,"y":0.159,"z":0.024},{"n":"MPowrApp","x":-0.067,"y":-0.103,"z":-0.175},{"n":"FintouchMoney","x":0.048,"y":-0.171,"z":-0.225},{"n":"FintouchApp","x":-0.205,"y":-0.029,"z":-0.122},{"n":"Findamental","x":0.917,"y":-0.023,"z":-0.14},{"n":"Fortuno","x":0.853,"y":-0.128,"z":-0.137},{"n":"MoneyGuru","x":-0.206,"y":-0.597,"z":-0.644},{"n":"SarathiMoney","x":-0.12,"y":-0.495,"z":0.379},{"n":"SarathiApp","x":-0.2,"y":-0.156,"z":0.696},{"n":"Prospr","x":0.765,"y":-0.143,"z":-0.184},{"n":"Moneyworks","x":-0.133,"y":-0.521,"z":-0.546},{"n":"Finpal","x":-0.014,"y":-0.022,"z":-0.145},{"n":"AccessMoney","x":-0.076,"y":-0.364,"z":-0.399},{"n":"Zerofees","x":0.159,"y":0.151,"z":0.02},{"n":"Finseva","x":-0.213,"y":-0.142,"z":0.769},{"n":"Indivest","x":0.245,"y":0.219,"z":0.106},{"n":"Indibucks","x":0.308,"y":0.31,"z":0.269},{"n":"AccessFund","x":-0.148,"y":-0.518,"z":-0.504},{"n":"Siphiesta","x":1,"y":-0.004,"z":0.07},{"n":"Siphy","x":1,"y":0.039,"z":0.046},{"n":"SwadesFunds","x":-0.13,"y":-0.423,"z":0.45},{"n":"Tmoney","x":0.257,"y":-0.364,"z":-0.374},{"n":"MoneyBoxIn","x":0.063,"y":-0.161,"z":-0.216},{"n":"LiquidMoney","x":-0.076,"y":-0.453,"z":-0.372},{"n":"OrbitMoney","x":-0.261,"y":-0.628,"z":-0.55},{"n":"OrbitFund","x":-0.325,"y":-0.677,"z":-0.706},{"n":"OrbitApp","x":0.208,"y":0.211,"z":-0.321},{"n":"LiquidFunds","x":-0.074,"y":-0.406,"z":-0.425},{"n":"Tigerapp","x":0.322,"y":0.336,"z":-0.241},{"n":"Tiger","x":-0.46,"y":0.348,"z":-0.217},{"n":"Tigermoney","x":-0.064,"y":-0.361,"z":-0.367},{"n":"Investory","x":1,"y":-0.247,"z":-0.232},{"n":"Indocoin","x":0.288,"y":-0.301,"z":0.26},{"n":"Moneywise","x":-0.27,"y":-0.607,"z":-0.641},{"n":"PaisaApp","x":0.01,"y":-0.495,"z":-0.086},{"n":"Trufund","x":-0.211,"y":-0.665,"z":-0.578},{"n":"Fingo","x":0.929,"y":0.007,"z":-0.008},{"n":"Finzo","x":1,"y":0.246,"z":0.121},{"n":"Mikrowise","x":0.209,"y":0.239,"z":0.127},{"n":"Microfin","x":-0.129,"y":0.065,"z":-0.023},{"n":"Finsutra","x":1,"y":0.286,"z":1},{"n":"Microvest","x":-0.043,"y":0.028,"z":-0.134},{"n":"Unitrust","x":0.302,"y":0.307,"z":0.191},{"n":"Indify","x":0.834,"y":-0.053,"z":-0.148},{"n":"Wealthitude","x":1,"y":-0.331,"z":-0.318},{"n":"HappyFund","x":-0.031,"y":0.029,"z":-0.388},{"n":"HappyMoney","x":-0.017,"y":0.11,"z":-0.342},{"n":"TurboMoney","x":-0.234,"y":-0.215,"z":-0.625},{"n":"TurboApp","x":0.146,"y":0.919,"z":-0.384},{"n":"Turbofin","x":-0.038,"y":0.902,"z":-0.393},{"n":"TurboDhan","x":0.021,"y":0.186,"z":0.566},{"n":"Onefinx","x":1,"y":0.102,"z":0.043},{"n":"Moneywatch","x":-0.278,"y":-0.598,"z":-0.639},{"n":"Moneypoint","x":-0.29,"y":-0.663,"z":-0.719},{"n":"Finsmart","x":0.053,"y":1,"z":-0.205},{"n":"Finwise","x":0.118,"y":0.364,"z":0.298},{"n":"Finosophy","x":0.695,"y":-0.283,"z":-0.275},{"n":"Swanidhi","x":0.119,"y":0.177,"z":0.996},{"n":"Finara","x":0.787,"y":-0.126,"z":-0.237},{"n":"Dhanaplan","x":0.01,"y":-0.278,"z":1},{"n":"Ayosh","x":1,"y":0.191,"z":0.257},{"n":"Finyog","x":1,"y":0.377,"z":1},{"n":"Finvesta","x":1,"y":-0.194,"z":-0.242},{"n":"VittaApp","x":0.137,"y":-0.186,"z":1},{"n":"VittaWise","x":-0.204,"y":-0.597,"z":0.773},{"n":"VittaMoney","x":-0.02,"y":-0.334,"z":0.458},{"n":"DoeetApp","x":-0.055,"y":-0.128,"z":-0.151},{"n":"VittaWealth","x":-0.039,"y":-0.435,"z":0.381},{"n":"SmartStep","x":-0.137,"y":0.861,"z":-0.456},{"n":"GoSmart","x":0.117,"y":1,"z":-0.219},{"n":"FinSmart","x":-0.089,"y":0.885,"z":-0.403},{"n":"SmartVest","x":-0.094,"y":0.884,"z":-0.426},{"n":"Smartio","x":0.916,"y":0.819,"z":-0.474},{"n":"Onvest","x":1,"y":0.121,"z":0.142},{"n":"SmartStone","x":-0.059,"y":0.99,"z":-0.384},{"n":"SmartFolio","x":-0.064,"y":0.065,"z":-0.397},{"n":"DeeSmart","x":-0.105,"y":0.893,"z":-0.417},{"n":"Allo","x":-0.057,"y":-0.142,"z":-0.208},{"n":"Nextm","x":0.709,"y":-0.163,"z":-0.284},{"n":"Nexsment","x":1,"y":0.129,"z":0.154},{"n":"Smartem","x":1,"y":0.922,"z":-0.3},{"n":"Smartern","x":1,"y":0.955,"z":-0.346},{"n":"Emsmart","x":1,"y":1,"z":-0.227},{"n":"Imsmart","x":0.771,"y":0.65,"z":-0.651},{"n":"Smartitude","x":1,"y":0.946,"z":-0.255},{"n":"SmallSteps","x":-0.056,"y":0.765,"z":-0.14},{"n":"Fundspot","x":-0.225,"y":-0.617,"z":-0.675},{"n":"Indomoney","x":-0.164,"y":-0.524,"z":-0.467},{"n":"Solidfund","x":-0.025,"y":-0.005,"z":-0.457},{"n":"Investov","x":1,"y":-0.226,"z":-0.254},{"n":"Finno","x":0.058,"y":0.074,"z":-0.069},{"n":"Heromoney","x":0.079,"y":0.204,"z":-0.256},{"n":"Finmo","x":0.953,"y":0.136,"z":-0.002},{"n":"DigiDhan","x":-0.173,"y":-0.506,"z":0.293},{"n":"Digimoney","x":-0.015,"y":-0.408,"z":-0.407},{"n":"Digismart","x":-0.283,"y":0.595,"z":-0.694},{"n":"Digiwealth","x":-0.025,"y":-0.285,"z":-0.272},{"n":"Indobank","x":0.232,"y":-0.287,"z":0.103},{"n":"Herofunds","x":-0.335,"y":-0.161,"z":-0.653},{"n":"Finfox","x":0.221,"y":0.281,"z":0.162},{"n":"Trymoney","x":-0.022,"y":-0.328,"z":-0.329},{"n":"Moneywisor","x":-0.083,"y":-0.511,"z":-0.49},{"n":"Bharatrade","x":0.155,"y":-0.418,"z":0.956},{"n":"SwadesMoney","x":-0.06,"y":-0.441,"z":0.439},{"n":"NiveshMill","x":-0.178,"y":-0.536,"z":0.826},{"n":"Wiserly","x":1,"y":0.175,"z":0.097},{"n":"Niyamo","x":0.954,"y":0.062,"z":0.004},{"n":"MoneyPlan","x":-0.209,"y":-0.553,"z":-0.58},{"n":"Apna","x":-0.751,"y":0.725,"z":0.762},{"n":"Arth","x":-0.548,"y":0.199,"z":1},{"n":"Ours","x":-0.383,"y":1,"z":-0.227},{"n":"Own","x":-0.675,"y":0.79,"z":-0.541},{"n":"Dhun","x":-0.663,"y":0.035,"z":0.866},{"n":"Hissa","x":-0.684,"y":0.747,"z":0.831},{"n":"Jama","x":-0.506,"y":0.242,"z":1},{"n":"Khud","x":-0.665,"y":0.778,"z":0.851},{"n":"Sahi","x":-0.803,"y":0.578,"z":0.686},{"n":"Unnati","x":-0.661,"y":0.77,"z":0.909},{"n":"Abhi","x":-0.408,"y":1,"z":1},{"n":"DhanBeej","x":-0.116,"y":-0.522,"z":0.851},{"n":"Pakka","x":-0.768,"y":0.677,"z":0.829},{"n":"Seedha","x":-0.5,"y":1,"z":1},{"n":"Shuru","x":-0.646,"y":0.877,"z":0.985},{"n":"Baro","x":-0.683,"y":0.006,"z":-0.061},{"n":"Stack","x":-0.75,"y":-0.12,"z":-0.619},{"n":"Mint","x":-0.729,"y":-0.113,"z":-0.646},{"n":"Claim","x":-0.735,"y":0.692,"z":-0.577},{"n":"Rally","x":-0.719,"y":0.695,"z":-0.582},{"n":"Pocket","x":-0.703,"y":-0.096,"z":-0.634},{"n":"Worthy","x":-0.673,"y":0.801,"z":-0.446},{"n":"Begin","x":-0.486,"y":0.989,"z":-0.31},{"n":"Varo","x":-0.1,"y":-0.115,"z":-0.182},{"n":"Smart","x":-0.442,"y":1,"z":-0.2},{"n":"Solid","x":-0.523,"y":0.987,"z":-0.349},{"n":"Steady","x":-0.663,"y":0.786,"z":-0.479},{"n":"Brave","x":-0.782,"y":0.605,"z":-0.676},{"n":"Frank","x":-0.667,"y":0.759,"z":-0.617},{"n":"Clear","x":-0.614,"y":0.787,"z":-0.44},{"n":"Keen","x":-0.457,"y":0.945,"z":-0.292},{"n":"Fair","x":-0.364,"y":1,"z":-0.221},{"n":"Proper","x":-0.54,"y":0.862,"z":-0.383},{"n":"SmartGrow","x":0.072,"y":1,"z":-0.282},{"n":"SmartGroww","x":-0.054,"y":0.966,"z":-0.287},{"n":"SmartRise","x":0.005,"y":0.992,"z":-0.311},{"n":"SmartClimb","x":-0.059,"y":0.947,"z":-0.424},{"n":"SmartGain","x":0.051,"y":1,"z":-0.216},{"n":"SmartYield","x":-0.012,"y":1,"z":-0.259},{"n":"SmartReturn","x":0.038,"y":0.979,"z":-0.311},{"n":"SmartEarn","x":-0.244,"y":0.613,"z":-0.656},{"n":"SmartBuild","x":-0.118,"y":0.867,"z":-0.464},{"n":"SmartScale","x":-0.221,"y":0.76,"z":-0.562},{"n":"SmartSave","x":-0.273,"y":0.606,"z":-0.644},{"n":"SmartStash","x":-0.013,"y":0.939,"z":-0.371},{"n":"SmartStore","x":-0.254,"y":0.639,"z":-0.694},{"n":"SmartStack","x":-0.007,"y":0.982,"z":-0.306},{"n":"SmartKeep","x":-0.172,"y":0.774,"z":-0.545},{"n":"SmartHold","x":-0.07,"y":0.856,"z":0.554},{"n":"SmartVault","x":0.069,"y":1,"z":-0.261},{"n":"SmartPot","x":-0.092,"y":0.883,"z":-0.495},{"n":"SmartPool","x":-0.218,"y":0.705,"z":-0.562},{"n":"SmartNest","x":-0.211,"y":0.757,"z":-0.511},{"n":"SmartFund","x":-0.23,"y":-0.073,"z":-0.626},{"n":"SmartSIP","x":-0.292,"y":-0.191,"z":-0.649},{"n":"SmartInvest","x":0.011,"y":0.193,"z":-0.281},{"n":"SmartCorpus","x":-0.171,"y":-0.087,"z":-0.533},{"n":"SmartAsset","x":-0.246,"y":-0.197,"z":-0.61},{"n":"SmartWealth","x":0.025,"y":0.163,"z":-0.249},{"n":"SmartMoney","x":0.063,"y":0.193,"z":-0.206},{"n":"SmartCoin","x":-0.096,"y":0.045,"z":-0.363},{"n":"SmartRupee","x":0.051,"y":0.234,"z":-0.189},{"n":"SmartMove","x":0.009,"y":0.953,"z":-0.311},{"n":"SmartStart","x":-0.105,"y":0.874,"z":-0.469},{"n":"SmartPush","x":0.007,"y":0.967,"z":-0.294},{"n":"SmartShift","x":-0.234,"y":0.651,"z":-0.654},{"n":"SmartSwitch","x":-0.079,"y":0.854,"z":-0.464},{"n":"SmartPace","x":0.031,"y":1,"z":-0.262},{"n":"SmartTrack","x":-0.162,"y":0.717,"z":-0.547},{"n":"SmartPath","x":-0.202,"y":0.64,"z":-0.68},{"n":"SmartRoute","x":-0.202,"y":0.745,"z":-0.502},{"n":"SmartEdge","x":-0.118,"y":0.774,"z":-0.482},{"n":"SmartSeed","x":0.027,"y":1,"z":-0.313},{"n":"Smartify","x":-0.296,"y":0.58,"z":-0.714},{"n":"SmartNivesh","x":0.041,"y":0.117,"z":0.685},{"n":"FundSmart","x":-0.078,"y":-0.013,"z":-0.437},{"n":"MoneySmart","x":-0.211,"y":-0.103,"z":-0.513},{"n":"WealthSmart","x":-0.198,"y":-0.167,"z":-0.659},{"n":"GrowSmart","x":-0.106,"y":0.76,"z":-0.469},{"n":"InvestSmart","x":-0.156,"y":-0.038,"z":-0.563},{"n":"SaveSmart","x":-0.03,"y":0.972,"z":-0.364},{"n":"EarnSmart","x":0.086,"y":1,"z":-0.229},{"n":"RupeeSmart","x":-0.295,"y":-0.219,"z":-0.663},{"n":"SIPSmart","x":0.026,"y":0.217,"z":-0.239},{"n":"PaisaSmart","x":0.025,"y":0.195,"z":-0.253},{"n":"BeSmart","x":-0.12,"y":0.886,"z":-0.445},{"n":"LiveSmart","x":0.008,"y":0.916,"z":-0.311},{"n":"ThinkSmart","x":-0.153,"y":0.822,"z":-0.438},{"n":"PlaySmart","x":-0.079,"y":0.863,"z":-0.352},{"n":"WorkSmart","x":-0.145,"y":0.838,"z":-0.546},{"n":"StartSmart","x":-0.065,"y":0.94,"z":-0.399},{"n":"StaySmart","x":-0.317,"y":0.641,"z":-0.687},{"n":"ActSmart","x":-0.169,"y":0.837,"z":-0.511},{"n":"MoveSmart","x":-0.006,"y":0.982,"z":-0.377},{"n":"Smartr","x":0.985,"y":0.876,"z":-0.344},{"n":"Smrt","x":0.712,"y":-0.143,"z":-0.284},{"n":"Smarte","x":1,"y":0.925,"z":-0.384},{"n":"Smarti","x":1,"y":1,"z":-0.263},{"n":"Smarta","x":1,"y":1,"z":-0.25},{"n":"Smaart","x":1,"y":0.281,"z":0.188},{"n":"Smartt","x":1,"y":0.902,"z":-0.381},{"n":"Smartx","x":0.707,"y":0.564,"z":-0.683},{"n":"Smarted","x":1,"y":1,"z":-0.35},{"n":"Outsmart","x":0.053,"y":0.949,"z":-0.29},{"n":"Upsmart","x":-0.296,"y":0.614,"z":-0.638},{"n":"Resmart","x":-0.035,"y":0.835,"z":-0.45},{"n":"Supersmart","x":-0.27,"y":0.693,"z":-0.576},{"n":"Streetsmrt","x":0.382,"y":0.318,"z":0.256},{"n":"Smarth","x":0.016,"y":0.759,"z":0.438},{"n":"Smartful","x":0.084,"y":1,"z":-0.165},{"n":"Smartwise","x":0.114,"y":1,"z":-0.184},{"n":"Smartcraft","x":-0.137,"y":0.794,"z":-0.502},{"n":"Smarter","x":-0.159,"y":0.796,"z":-0.533},{"n":"Smartness","x":-0.095,"y":0.836,"z":-0.421},{"n":"Smartwork","x":-0.136,"y":0.788,"z":-0.507},{"n":"Smartly","x":-0.232,"y":0.664,"z":-0.605},{"n":"Smarto","x":0.315,"y":0.964,"z":-0.301},{"n":"SmartZindagi","x":-0.077,"y":0.826,"z":0.474},{"n":"SmartKadam","x":-0.068,"y":0.861,"z":0.536},{"n":"SmartRaasta","x":0.082,"y":1,"z":0.605},{"n":"SmartSafar","x":0.063,"y":1,"z":0.657},{"n":"SmartDost","x":-0.05,"y":0.854,"z":0.494},{"n":"SmartYaar","x":-0.11,"y":0.903,"z":0.577},{"n":"SmartLife","x":-0.183,"y":0.721,"z":-0.598},{"n":"SmartIndia","x":-0.342,"y":0.603,"z":-0.723},{"n":"SmartBharat","x":-0.226,"y":0.7,"z":0.408},{"n":"SmartLog","x":-0.037,"y":0.896,"z":-0.413},{"n":"RIZE","x":0.977,"y":0.115,"z":-0.082},{"n":"Movo","x":1,"y":0.321,"z":0.107},{"n":"Savvi","x":0.766,"y":-0.048,"z":-0.222},{"n":"Finin","x":1,"y":0.31,"z":0.134},{"n":"Stok","x":0.845,"y":-0.019,"z":-0.14},{"n":"Runn","x":1,"y":0.176,"z":0.033},{"n":"Fynd","x":1,"y":0.379,"z":0.199},{"n":"Belo","x":0.995,"y":0.23,"z":0.026},{"n":"Nivo","x":0.774,"y":-0.026,"z":-0.2},{"n":"Censo","x":1,"y":0.201,"z":0.094},{"n":"Nidhi","x":-0.534,"y":0.213,"z":1},{"n":"Mool","x":-0.455,"y":0.381,"z":1},{"n":"Pahal","x":-0.682,"y":0.68,"z":0.874},{"n":"Kadam","x":-0.458,"y":1,"z":1},{"n":"Bada","x":-0.722,"y":0.023,"z":0.841},{"n":"Taka","x":-0.678,"y":0.023,"z":0.861},{"n":"Digo","x":0.96,"y":0.057,"z":-0.077},{"n":"Taarakki","x":0.956,"y":0.771,"z":0.895},{"n":"Tomoro","x":1,"y":1,"z":0.263},{"n":"Finova","x":0.926,"y":0.045,"z":-0.098},{"n":"Fintigo","x":1,"y":0.377,"z":0.204},{"n":"Clever","x":-0.479,"y":0.595,"z":-0.295},{"n":"Sharp","x":-0.756,"y":0.343,"z":-0.516},{"n":"Bright","x":-0.799,"y":0.661,"z":-0.7},{"n":"Astute","x":-0.62,"y":0.456,"z":-0.471},{"n":"Savvy","x":-0.618,"y":0.564,"z":-0.341},{"n":"Shrewd","x":-0.814,"y":0.345,"z":-0.614},{"n":"Canny","x":-0.796,"y":0.358,"z":-0.535},{"n":"Witty","x":-0.696,"y":0.387,"z":-0.514},{"n":"Acute","x":-0.707,"y":0.403,"z":-0.427},{"n":"Quick","x":-0.512,"y":0.587,"z":-0.344},{"n":"Nimble","x":-0.617,"y":0.528,"z":-0.346},{"n":"Slick","x":-0.494,"y":0.624,"z":-0.302},{"n":"Adroit","x":-0.464,"y":0.702,"z":-0.257},{"n":"Deft","x":-0.8,"y":0.288,"z":-0.582},{"n":"Gifted","x":-0.824,"y":0.351,"z":-0.602},{"n":"Brilliant","x":-0.447,"y":0.623,"z":-0.251},{"n":"Wise","x":-0.601,"y":0.525,"z":-0.435},{"n":"Informed","x":-0.425,"y":0.715,"z":-0.223},{"n":"Aware","x":-0.437,"y":0.706,"z":-0.273},{"n":"Ahead","x":-0.802,"y":0.585,"z":-0.231},{"n":"Agile","x":-0.778,"y":0.382,"z":-0.504},{"n":"Alive","x":-0.559,"y":0.601,"z":-0.318},{"n":"Brisk","x":-0.397,"y":0.674,"z":-0.278},{"n":"Buoyant","x":-0.749,"y":0.376,"z":-0.527},{"n":"Dynamic","x":-0.725,"y":0.397,"z":-0.504},{"n":"Elastic","x":-0.482,"y":0.681,"z":-0.223},{"n":"Fluid","x":-0.792,"y":0.358,"z":-0.596},{"n":"Kinetic","x":-0.604,"y":0.486,"z":-0.398},{"n":"Lively","x":-0.67,"y":0.419,"z":-0.525},{"n":"Mobile","x":-0.767,"y":0.325,"z":-0.608},{"n":"Prompt","x":-0.653,"y":0.507,"z":-0.449},{"n":"Swift","x":-0.569,"y":0.596,"z":-0.372},{"n":"Vivid","x":-0.652,"y":0.474,"z":-0.438},{"n":"Vital","x":-0.69,"y":0.416,"z":-0.465},{"n":"Vibrant","x":-0.492,"y":0.671,"z":-0.265},{"n":"Zeal","x":-0.605,"y":0.773,"z":-0.029},{"n":"Zippy","x":-0.697,"y":0.461,"z":-0.473},{"n":"Anchored","x":-0.509,"y":0.629,"z":-0.345},{"n":"Balanced","x":-0.523,"y":0.483,"z":-0.37},{"n":"Bedrock","x":-0.514,"y":0.61,"z":-0.288},{"n":"Calm","x":-0.795,"y":0.612,"z":-0.271},{"n":"Composed","x":-0.776,"y":0.315,"z":-0.607},{"n":"Constant","x":-0.753,"y":0.324,"z":-0.532},{"n":"Durable","x":-0.598,"y":0.43,"z":-0.484},{"n":"Lasting","x":-0.746,"y":0.308,"z":-0.602},{"n":"Measured","x":-0.571,"y":0.525,"z":-0.361},{"n":"Mellow","x":-0.627,"y":0.456,"z":-0.418},{"n":"Patient","x":-0.79,"y":0.331,"z":-0.55},{"n":"Poised","x":-0.629,"y":0.5,"z":-0.425},{"n":"Rooted","x":-0.797,"y":0.341,"z":-0.561},{"n":"Secure","x":-0.626,"y":0.722,"z":-0.153},{"n":"Settled","x":-0.771,"y":0.269,"z":-0.58},{"n":"Stable","x":-0.638,"y":0.419,"z":-0.442},{"n":"Still","x":-0.697,"y":0.348,"z":-0.518},{"n":"Whole","x":-0.655,"y":0.437,"z":-0.482},{"n":"Adept","x":-0.416,"y":0.729,"z":-0.177},{"n":"Apt","x":-0.463,"y":0.66,"z":-0.267},{"n":"Discerning","x":-0.551,"y":0.489,"z":-0.392},{"n":"Earnest","x":-0.568,"y":0.601,"z":-0.283},{"n":"Gallant","x":-0.516,"y":0.577,"z":-0.314},{"n":"Hardy","x":-0.525,"y":0.584,"z":-0.273},{"n":"Lucid","x":-0.796,"y":0.287,"z":-0.586},{"n":"Plucky","x":-0.458,"y":0.633,"z":-0.279},{"n":"Resolute","x":-0.563,"y":0.568,"z":-0.31},{"n":"Robust","x":-0.579,"y":0.553,"z":-0.288},{"n":"Sage","x":-0.585,"y":0.515,"z":-0.431},{"n":"Seasoned","x":-0.697,"y":0.45,"z":-0.492},{"n":"Staunch","x":-0.579,"y":0.507,"z":-0.395},{"n":"Tenacious","x":-0.5,"y":0.656,"z":-0.326},{"n":"Valiant","x":-0.547,"y":0.593,"z":-0.354},{"n":"Bold","x":-0.657,"y":0.789,"z":-0.564},{"n":"Deep","x":-0.781,"y":0.343,"z":-0.558},{"n":"Crisp","x":-0.768,"y":0.252,"z":-0.608},{"n":"Focused","x":-0.793,"y":0.335,"z":-0.588},{"n":"Alert","x":-0.811,"y":0.288,"z":-0.542},{"n":"Awake","x":-0.467,"y":0.643,"z":-0.262},{"n":"Vast","x":-0.556,"y":0.561,"z":-0.382},{"n":"Grand","x":-0.537,"y":0.609,"z":-0.352},{"n":"Neat","x":-0.449,"y":0.619,"z":-0.288},{"n":"Plain","x":-0.471,"y":0.624,"z":-0.253},{"n":"Right","x":-0.613,"y":0.132,"z":-0.387},{"n":"Set","x":-0.765,"y":-0.169,"z":-0.65},{"n":"Sure","x":-0.503,"y":0.235,"z":-0.322},{"n":"True","x":-0.457,"y":0.208,"z":-0.362}];
+var CATS={
+  'smart-family':{c:0x4C7BE0,label:'Smart family'},
+  'english-descriptors':{c:0xE05C7A,label:'English descriptors'},
+  'hindi-rooted':{c:0x2DC882,label:'Hindi-rooted'},
+  'fintech-compounds':{c:0xD4943A,label:'Fintech compounds'},
+  'coined-suggestive':{c:0xE84E30,label:'Coined suggestive'},
+  'coined-abstract':{c:0x9B6BD4,label:'Coined abstract'},
+  'fin-coined':{c:0x3DB8B0,label:'Fin-coined'},
+  'real-product':{c:0xB8B03A,label:'Real product words'}
+};
+function getTags(n,x,y,z){
+  var l=n.toLowerCase(),tags=[];
+  if(l.indexOf('smart')>=0)tags.push('smart-family');
+  var hi=['apna','arth','dhun','hissa','jama','khud','sahi','unnati','abhi','pakka','seedha','shuru','nidhi','mool','pahal','kadam','bada','taka','dhan','vitta','nivesh','swades','bharat','sarathi','seva','swanidhi','yog','sutra','dost','paisa'];
+  for(var i=0;i<hi.length;i++)if(l===hi[i]||l.indexOf(hi[i])>=0){tags.push('hindi-rooted');break}
+  var fc=['money','fund','wealth','digi'];
+  for(var i=0;i<fc.length;i++)if(l.indexOf(fc[i])>=0&&l!==fc[i]){tags.push('fintech-compounds');break}
+  if((l.indexOf('fin')===0||l.indexOf('invest')>=0)&&x>0.1)tags.push('fin-coined');
+  var csug=['rize','tomoro','movo','savvi','prospr','wiserly','runn','fynd','belo','nivo','censo','digo','finin','stok','smrt','taarakki','indify','niyamo','onvest','stephin'];
+  if(csug.indexOf(l)>=0)tags.push('coined-suggestive');
+  var cabs=['siphiesta','siphy','riave','allo','fortuno','ayosh','nexsment','nextm','finosophy','wealthitude'];
+  if(cabs.indexOf(l)>=0)tags.push('coined-abstract');
+  else if(x>0.5&&Math.abs(y)<0.2&&tags.length===0)tags.push('coined-abstract');
+  var desc=['agile','alive','brisk','buoyant','dynamic','elastic','fluid','kinetic','lively','mobile','prompt','swift','vivid','vital','vibrant','zeal','zippy','anchored','balanced','bedrock','calm','composed','constant','durable','lasting','measured','mellow','patient','poised','rooted','secure','settled','stable','still','whole','adept','apt','discerning','earnest','gallant','hardy','lucid','plucky','resolute','robust','sage','seasoned','staunch','tenacious','valiant','clever','sharp','bright','astute','savvy','shrewd','canny','witty','acute','quick','nimble','slick','adroit','deft','gifted','brilliant','wise','informed','aware','ahead','deep','crisp','focused','alert','awake','vast','grand','neat','plain','right','set','sure','true','bold','brave','solid','steady','keen','fair','proper','frank','clear','worthy'];
+  if(desc.indexOf(l)>=0)tags.push('english-descriptors');
+  var rp=['market','mint','stack','pocket','claim','rally','begin','simply','tiger','varo','baro'];
+  if(rp.indexOf(l)>=0)tags.push('real-product');
+  if(tags.length===0){if(x<-0.3&&z<-0.2)tags.push('english-descriptors');else if(x>0.3)tags.push('coined-abstract');else if(y<-0.2)tags.push('fintech-compounds');else if(z>0.2)tags.push('hindi-rooted');else tags.push('real-product')}
+  return tags;
+}
+
+var all=SEED.map(function(d){var tags=getTags(d.n,d.x,d.y,d.z);return{name:d.n,tags:tags,col:CATS[tags[0]]?CATS[tags[0]].c:0x888888}});
+var N=all.length;
+var activeCat='all',catKeys=Object.keys(CATS);
+
+// Three.js — matching the Codrops source exactly
+var scene,camera,renderer;
+var COLS,ROWS;
+var mousePos={x:9999,y:9999};
+var targetMouse={x:9999,y:9999};
+var cardData=[]; // {mesh, gridPos, defaultScale, maxScale, targetScale}
+var sharedGeom;
+var lastTime=performance.now();
+
+function makeCardTexture(name,color){
+  var c=document.createElement('canvas');c.width=256;c.height=256;
+  var g=c.getContext('2d');
+  var r=(color>>16)&255,gr=(color>>8)&255,b=color&255;
+  // Fill entire canvas with dark base — no white corners
+  g.fillStyle='#0a0a0c';
+  g.fillRect(0,0,256,256);
+  // Dark card
+  g.fillStyle='#111116';
+  g.fillRect(0,0,256,256);
+  // Color tint
+  g.fillStyle='rgba('+r+','+gr+','+b+',0.45)';
+  g.fillRect(0,0,256,256);
+  // Highlight gradient
+  var grd=g.createLinearGradient(0,0,0,256);
+  grd.addColorStop(0,'rgba(255,255,255,0.18)');grd.addColorStop(0.3,'rgba(255,255,255,0.04)');grd.addColorStop(1,'rgba(0,0,0,0.12)');
+  g.fillStyle=grd;g.fillRect(4,4,248,248);
+  // Border
+  
+  // Text
+  var fs=Math.min(40,220/(name.length*0.55));
+  g.font='700 '+Math.round(fs)+'px "DM Sans",sans-serif';
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle='rgba(255,255,255,1)';
+  g.fillText(name,128,132);
+  return c;
+}
+
+// Desaturated version
+function makeCardTextureBW(name,color){
+  var c=document.createElement('canvas');c.width=256;c.height=256;
+  var g=c.getContext('2d');
+  g.fillStyle='#0a0a0c';
+  g.fillRect(0,0,256,256);
+  g.fillStyle='#111116';
+  g.fillRect(0,0,256,256);
+  g.fillStyle='rgba(60,60,60,0.15)';
+  g.fillRect(0,0,256,256);
+  var grd=g.createLinearGradient(0,0,0,256);
+  grd.addColorStop(0,'rgba(255,255,255,0.08)');grd.addColorStop(0.3,'rgba(255,255,255,0.01)');grd.addColorStop(1,'rgba(0,0,0,0.06)');
+  g.fillStyle=grd;g.fillRect(4,4,248,248);
+  
+  var fs=Math.min(40,220/(name.length*0.55));
+  g.font='700 '+Math.round(fs)+'px "DM Sans",sans-serif';
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle='rgba(255,255,255,0.4)';
+  g.fillText(name,128,132);
+  return c;
+}
+
+function init(){
+  var W=innerWidth,H=innerHeight;
+  var aspect=W/H;
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0a0a0c);
+
+  // Ortho camera exactly like the source: left=-1, right=1, top=1, bottom=-1
+  camera=new THREE.OrthographicCamera(-1,1,1,-1,0,100);
+  camera.position.z=5;
+
+  renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+  renderer.setSize(W,H);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  document.getElementById('cv').appendChild(renderer.domElement);
+
+  // Grid dimensions — one card per ~100px, odd numbers for centering
+  COLS=Math.floor(W/100)|1;
+  ROWS=Math.floor(H/100)|1;
+
+  // Card scale in camera space
+  var viewW=camera.right-camera.left; // = 2
+  var colW=viewW/COLS;
+  var defaultScaleX=colW;
+  var defaultScaleY=colW*aspect;
+
+  var isPortrait=W<H;
+  var scaleFactor=isPortrait?2:4;
+  var maxScaleX=defaultScaleX*scaleFactor;
+  var maxScaleY=defaultScaleY*scaleFactor;
+
+  sharedGeom=new THREE.PlaneGeometry(1,1);
+
+  for(var i=0;i<COLS;i++){
+    for(var j=0;j<ROWS;j++){
+      var idx=(i*ROWS+j)%N;
+      var d=all[idx];
+
+      // Two textures: color and BW
+      var texColor=new THREE.CanvasTexture(makeCardTexture(d.name,d.col));
+      texColor.minFilter=THREE.LinearFilter;
+      var texBW=new THREE.CanvasTexture(makeCardTextureBW(d.name,d.col));
+      texBW.minFilter=THREE.LinearFilter;
+
+      // Custom shader material — blends color and BW based on distance
+      var mat=new THREE.ShaderMaterial({
+        uniforms:{
+          uTexColor:{value:texColor},
+          uTexBW:{value:texBW},
+          uDistance:{value:0}
+        },
+        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+        fragmentShader:'uniform sampler2D uTexColor;uniform sampler2D uTexBW;uniform float uDistance;varying vec2 vUv;void main(){vec4 col=texture2D(uTexColor,vUv);vec4 bw=texture2D(uTexBW,vUv);float f=min(max(uDistance,0.),1.);gl_FragColor=mix(col,bw,f);}',
+        transparent:false
+      });
+
+      var mesh=new THREE.Mesh(sharedGeom,mat);
+
+      // Grid position in camera space
+      var cardW=defaultScaleX*0.5;
+      var cardH=defaultScaleY*0.5;
+      var gx=THREE.MathUtils.mapLinear(i,0,COLS,camera.left,camera.right)+cardW;
+      var gy=THREE.MathUtils.mapLinear(j,0,ROWS,camera.bottom,camera.top)+cardH;
+
+      // Mesh scale = the card visual size
+      mesh.scale.set(defaultScaleX,defaultScaleY,1);
+
+      // Object3D wrapper for the 0.4 default scale
+      var wrapper=new THREE.Object3D();
+      wrapper.add(mesh);
+      wrapper.scale.set(0.4,0.4,1);
+
+      // Start at center (0,0) for intro animation
+      wrapper.position.set(0,0,0);
+
+      scene.add(wrapper);
+
+      cardData.push({
+        wrapper:wrapper,
+        mesh:mesh,
+        mat:mat,
+        gridX:gx,
+        gridY:gy,
+        defaultScaleX:defaultScaleX,
+        defaultScaleY:defaultScaleY,
+        maxScaleX:maxScaleX,
+        maxScaleY:maxScaleY,
+        targetScaleX:defaultScaleX,
+        targetScaleY:defaultScaleY,
+        tags:d.tags,
+        name:d.name
+      });
+    }
+  }
+
+  // Mouse
+  window.addEventListener('mousemove',function(e){
+    targetMouse.x=(e.clientX-W*0.5)/W*2;
+    targetMouse.y=-(e.clientY-H*0.5)/H*2;
+  });
+  window.addEventListener('touchmove',function(e){
+    var t=e.touches[0];
+    targetMouse.x=(t.clientX-W*0.5)/W*2;
+    targetMouse.y=-(t.clientY-H*0.5)/H*2;
+  },{passive:true});
+
+  buildLegend();
+  animate();
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  var now=performance.now();
+  var dt=(now-lastTime)/1000;
+  lastTime=now;
+  if(dt>0.1)dt=0.1;
+
+  // Smooth mouse — matching source: 1 - pow(0.0125, dt)
+  var ml=1-Math.pow(0.0125,dt);
+  mousePos.x+=(targetMouse.x-mousePos.x)*ml;
+  mousePos.y+=(targetMouse.y-mousePos.y)*ml;
+
+  var aspect=innerWidth/innerHeight;
+
+  for(var i=0;i<cardData.length;i++){
+    var c=cardData[i];
+    var isAct=activeCat==='all'||c.tags.indexOf(activeCat)>=0;
+
+    // --- POSITION: Intro animation (slide from center to grid pos) ---
+    var distX=Math.abs(c.gridX-c.wrapper.position.x);
+    var tpx=c.gridX;
+    var tpy=distX<0.075?c.gridY:0; // Y only starts when X is close
+    var tpz=c.wrapper.position.z;
+
+    var posLerp=1-Math.pow(0.005/COLS,dt);
+    c.wrapper.position.x+=(tpx-c.wrapper.position.x)*posLerp;
+    c.wrapper.position.y+=(tpy-c.wrapper.position.y)*posLerp;
+
+    // --- SCALE: Distance-based magnification ---
+    var dx=mousePos.x-c.wrapper.position.x;
+    var dy=(mousePos.y-c.wrapper.position.y)/aspect;
+    var distance=dx*dx+dy*dy;
+    distance*=(aspect>1?12:3);
+
+    var influence=Math.max(1-distance,0);
+
+    if(!isAct){
+      c.targetScaleX=c.defaultScaleX*0.3;
+      c.targetScaleY=c.defaultScaleY*0.3;
+    }else{
+      c.targetScaleX=THREE.MathUtils.lerp(c.defaultScaleX,c.maxScaleX,influence);
+      c.targetScaleY=THREE.MathUtils.lerp(c.defaultScaleY,c.maxScaleY,influence);
+    }
+
+    // Smooth scale — matching source: 1 - pow(0.0002, dt)
+    var sl=1-Math.pow(0.0002,dt);
+    c.mesh.scale.x+=(c.targetScaleX-c.mesh.scale.x)*sl;
+    c.mesh.scale.y+=(c.targetScaleY-c.mesh.scale.y)*sl;
+
+    // Z-sort: closer to mouse = on top
+    c.wrapper.position.z=-distance;
+
+    // Shader: distance controls color↔BW blend
+    c.mat.uniforms.uDistance.value=isAct?distance:1;
+  }
+
+  renderer.render(scene,camera);
+}
+
+function buildLegend(){
+  var el=document.getElementById('leg');
+  var h='<div class="li active" data-c="all" onclick="filt(\'all\')"><div class="ld" style="background:#666"></div>All</div>';
+  catKeys.forEach(function(k){h+='<div class="li" data-c="'+k+'" onclick="filt(\''+k+'\')"><div class="ld" style="background:#'+CATS[k].c.toString(16).padStart(6,'0')+'"></div>'+CATS[k].label+'</div>'});
+  el.innerHTML=h;
+}
+function filt(c){activeCat=c;document.querySelectorAll('.li').forEach(function(el){el.classList.toggle('active',el.dataset.c===c)});if(document.getElementById('listPanel').classList.contains('show'))renderList()}
+
+function focusOnName(name){
+  // Find the card with this name and move it to center by swapping grid positions
+  var targetIdx=-1;
+  for(var i=0;i<cardData.length;i++){
+    if(cardData[i].name===name){targetIdx=i;break}
+  }
+  if(targetIdx<0)return;
+
+  // Find the card closest to center (0,0)
+  var centerIdx=0,centerDist=Infinity;
+  for(var i=0;i<cardData.length;i++){
+    var d=Math.abs(cardData[i].gridX)+Math.abs(cardData[i].gridY);
+    if(d<centerDist){centerDist=d;centerIdx=i}
+  }
+
+  // Swap grid positions
+  var tx=cardData[targetIdx].gridX, ty=cardData[targetIdx].gridY;
+  cardData[targetIdx].gridX=cardData[centerIdx].gridX;
+  cardData[targetIdx].gridY=cardData[centerIdx].gridY;
+  cardData[centerIdx].gridX=tx;
+  cardData[centerIdx].gridY=ty;
+
+  // Move mouse to center to highlight it
+  targetMouse.x=0;targetMouse.y=0;
+}
+
+// Search
+var si=document.getElementById('si'),sr=document.getElementById('sr');
+si.addEventListener('input',function(){
+  var q=this.value.trim().toLowerCase();
+  if(q.length<1){sr.classList.remove('show');return}
+  var names=[];
+  for(var i=0;i<cardData.length;i++){
+    if(cardData[i].name.toLowerCase().indexOf(q)>=0)names.push(cardData[i].name);
+  }
+  // Dedupe
+  var seen={},unique=[];
+  for(var i=0;i<names.length;i++){if(!seen[names[i]]){seen[names[i]]=true;unique.push(names[i])}}
+  unique=unique.slice(0,8);
+
+  var h='';
+  for(var i=0;i<unique.length;i++){
+    h+='<div class="sri" data-n="'+unique[i]+'">'+unique[i]+'</div>';
+  }
+  var exact=false;
+  for(var i=0;i<unique.length;i++){if(unique[i].toLowerCase()===q){exact=true;break}}
+  if(!exact&&q.length>1){
+    h+='<div class="sri add" data-a="'+this.value.trim()+'">+ Add "'+this.value.trim()+'"</div>';
+  }
+  sr.innerHTML=h;sr.classList.add('show');
+  sr.querySelectorAll('.sri:not(.add)').forEach(function(el){
+    el.onclick=function(){focusOnName(this.dataset.n);sr.classList.remove('show');si.value='';si.blur()}
+  });
+  sr.querySelectorAll('.sri.add').forEach(function(el){
+    el.onclick=function(){sr.classList.remove('show');si.value='';si.blur();alert('Add name feature coming soon')}
+  });
+});
+si.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    var q=this.value.trim().toLowerCase();
+    var found=null;
+    for(var i=0;i<cardData.length;i++){if(cardData[i].name.toLowerCase().indexOf(q)>=0){found=cardData[i].name;break}}
+    if(found){focusOnName(found);sr.classList.remove('show');this.value='';this.blur()}
+  }
+  if(e.key==='Escape'){sr.classList.remove('show');this.blur()}
+});
+document.addEventListener('click',function(e){if(!e.target.closest('.sb'))sr.classList.remove('show')});
+
+// List view
+function toggleList(){
+  var p=document.getElementById('listPanel'),b=document.getElementById('listToggle');
+  var s=p.classList.toggle('show');b.classList.toggle('active',s);
+  if(s)renderList();
+}
+function renderList(){
+  var body=document.getElementById('listBody'),filtered=[];
+  var seen={};
+  for(var i=0;i<cardData.length;i++){
+    var cd=cardData[i];
+    if(seen[cd.name])continue;seen[cd.name]=true;
+    var isAct=activeCat==='all'||cd.tags.indexOf(activeCat)>=0;
+    if(isAct)filtered.push(cd);
+  }
+  filtered.sort(function(a,b){return a.name.localeCompare(b.name)});
+  document.getElementById('listCount').textContent=filtered.length+' names';
+  var h='';
+  for(var i=0;i<filtered.length;i++){
+    var f=filtered[i];
+    var dc='#'+(f.tags.length>0&&CATS[f.tags[0]]?CATS[f.tags[0]].c:0x888888).toString(16).padStart(6,'0');
+    var th='';
+    for(var t=0;t<f.tags.length;t++){
+      var ci=CATS[f.tags[t]];
+      if(ci){var hex='#'+ci.c.toString(16).padStart(6,'0');th+='<span class="list-tag" style="background:'+hex+'22;color:'+hex+'">'+ci.label+'</span>'}
+    }
+    var safeName=f.name.replace(/'/g,"\\'");
+    h+='<div class="list-item" onclick="focusOnName(\''+safeName+'\')"><div class="list-dot" style="background:'+dc+'"></div><span class="list-name">'+f.name+'</span><div class="list-tags">'+th+'</div></div>';
+  }
+  body.innerHTML=h;
+}
+
+// Patch filt to update list
+var _origFilt=filt;
+
+init();
+</script>
+</body>
+</html>
